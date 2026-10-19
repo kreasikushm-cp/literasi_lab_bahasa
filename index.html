@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Petualangan Literasi dan Laboratorium Bahasa - SMP/MTs</title>
+  <style>
+    :root {
+      --primary-blue: #0288d1;
+      --dark-blue: #01579b;
+      --accent-green: #2e7d32;
+      --light-green: #e8f5e9;
+      --accent-orange: #f57c00;
+      --bg-light: #f4f7f6;
+      --card-bg: #ffffff;
+      --text-dark: #212121;
+      --text-muted: #616161;
+      --correct-green: #2e7d32;
+      --wrong-red: #c62828;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-light); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; }
+
+    header { background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue)); color: white; padding: 15px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
+    header h1 { font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
+    header p { font-size: 0.95rem; font-style: italic; margin-top: 4px; color: #e0f7fa; }
+    .school-tag { position: absolute; left: 20px; top: 15px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; }
+
+    .container { max-width: 1000px; width: 100%; margin: 20px auto; padding: 20px; flex: 1; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 8px 16px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .hidden { display: none !important; }
+
+    .btn { display: inline-block; background-color: var(--primary-blue); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; text-align: center; text-decoration: none; margin: 5px; }
+    .btn:hover { background-color: var(--dark-blue); transform: translateY(-2px); }
+    .btn-orange { background-color: var(--accent-orange); color: white; }
+    .btn-orange:hover { background-color: #e65100; }
+    .btn-green { background-color: var(--accent-green); color: white; }
+    .btn-green:hover { background-color: #1b5e20; }
+    .btn-large { font-size: 1.2rem; padding: 16px 32px; width: 100%; max-width: 350px; }
+
+    .game-logo { width: 80px; height: 80px; margin: 0 auto 15px; display: block; fill: var(--primary-blue); }
+    .mode-icon { width: 50px; height: 50px; display: inline-flex; align-items: center; justify-content: center; background: var(--light-green); border-radius: 50%; font-weight: bold; color: var(--accent-green); margin-bottom: 10px; font-size: 1.3rem; border: 2px solid var(--accent-green); }
+
+    .form-group { margin-bottom: 15px; text-align: left; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--text-dark); }
+    .form-control { width: 100%; padding: 12px; border: 2px solid #ccc; border-radius: 6px; font-size: 1rem; }
+
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+    .mode-card { border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; text-align: center; transition: 0.3s; background: #fafafa; }
+    .mode-card:hover { border-color: var(--primary-blue); transform: scale(1.02); background: #fff; }
+
+    .quiz-option { display: block; width: 100%; padding: 14px; margin: 10px 0; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; text-align: left; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+    .quiz-option:hover { background: #e3f2fd; border-color: var(--primary-blue); }
+    .quiz-option.correct { background-color: #c8e6c9 !important; border-color: var(--correct-green) !important; color: #1b5e20; }
+    .quiz-option.wrong { background-color: #ffcdd2 !important; border-color: var(--wrong-red) !important; color: #b71c1c; }
+
+    .feedback-box { padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 0.95rem; line-height: 1.5; }
+    .feedback-box.correct { background: #e8f5e9; border: 1px solid var(--correct-green); color: #1b5e20; }
+    .feedback-box.wrong { background: #ffebee; border: 1px solid var(--wrong-red); color: #b71c1c; }
+
+    .timer-bar { height: 10px; background-color: #e0e0e0; border-radius: 5px; overflow: hidden; margin-bottom: 15px; }
+    .timer-progress { height: 100%; background-color: var(--accent-orange); width: 100%; transition: width 1s linear; }
+
+    .badge-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 15px 0; }
+    .badge { padding: 8px 16px; background: #fff3e0; border: 2px solid var(--accent-orange); border-radius: 20px; font-weight: bold; color: #e65100; font-size: 0.9rem; }
+
+    .sortable-item { background: #fff; border: 2px solid var(--primary-blue); padding: 12px; margin: 8px 0; border-radius: 6px; cursor: move; display: flex; justify-content: space-between; align-items: center; }
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background-color: var(--primary-blue); color: white; }
+
+    textarea.form-control { resize: vertical; min-height: 120px; }
+
+    @media print {
+      header, .no-print { display: none !important; }
+      .container { max-width: 100%; margin: 0; padding: 0; }
+      .card { box-shadow: none; border: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="school-tag" id="school-tag">SMP NEGERI LITERASI</div>
+    <h1>PETUALANGAN LITERASI & LABORATORIUM BAHASA</h1>
+    <p>“Baca dengan Cermat, Berpikir dengan Kritis, Berkarya dengan Bahasa!”</p>
+  </header>
+
+  <div class="container">
+    
+    <!-- HALAMAN BERANDA / REGISTRASI -->
+    <div id="page-landing" class="card text-center">
+      <svg class="game-logo" viewBox="0 0 24 24">
+        <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4l7 3.82 7-3.82v-4L12 17l-7-3.82z"/>
+      </svg>
+      <h2>Selamat Datang, Detektif & Ahli Bahasa Muda!</h2>
+      <p style="margin-bottom: 20px; color: var(--text-muted);">Asah kemampuan membaca, tata bahasa, berpikir kritis, dan menulis kreatifmu di sini.</p>
+
+      <div style="max-width: 400px; margin: 0 auto;">
+        <div class="form-group">
+          <label for="player-name">Nama Pemain / Kelompok:</label>
+          <input type="text" id="player-name" class="form-control" placeholder="Masukkan nama..." value="Siswa Literasi">
+        </div>
+        <div class="form-group">
+          <label for="player-class">Tingkat Kelas:</label>
+          <select id="player-class" class="form-control">
+            <option value="VII">Kelas VII (Tujuh)</option>
+            <option value="VIII">Kelas VIII (Delapan)</option>
+            <option value="IX">Kelas IX (Sembilan)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="player-mode">Mode Bermain:</label>
+          <select id="player-mode" class="form-control">
+            <option value="Individu">Individu</option>
+            <option value="Kelompok">Kelompok</option>
+          </select>
+        </div>
+        <button class="btn btn-orange btn-large" onclick="startGame()">MULAI PETUALANGAN</button>
+      </div>
+
+      <div style="margin-top: 25px;" class="no-print">
+        <button class="btn btn-green" onclick="showPage('page-guide')">PANDUAN BERMAIN</button>
+        <button class="btn" onclick="showPage('page-teacher')">MODE GURU & EVALUASI</button>
+      </div>
+    </div>
+
+    <!-- PANDUAN BERMAIN -->
+    <div id="page-guide" class="card hidden">
+      <h3>Panduan Petualangan Literasi</h3>
+      <p style="margin-top: 10px;">Selamat datang di game **Petualangan Literasi & Laboratorium Bahasa**! Berikut petunjuknya:</p>
+      <ul style="text-align: left; margin: 15px 0 20px 30px; line-height: 1.8;">
+        <li>Pilih mode permainan yang ingin kamu selesaikan dari Dashboard.</li>
+        <li>Setiap jawaban benar bernilai <strong>10 Poin</strong>.</li>
+        <li>Beberapa tantangan menyusun paragraf dan cek fakta memberi <strong>Bonus +5 Poin</strong>.</li>
+        <li>Kumpulkan poin untuk meraih gelar tertinggi <strong>Maestro Literasi</strong> atau <strong>Duta Literasi Muda</strong>.</li>
+        <li>Guru dapat menggunakan mode Klasikal untuk ditayangkan di layar Proyektor/IFP kelas.</li>
+      </ul>
+      <button class="btn btn-orange" onclick="showPage('page-landing')">Kembali ke Beranda</button>
+    </div>
+
+    <!-- DASHBOARD MENU UTAMA -->
+    <div id="page-dashboard" class="card hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+        <div>
+          <h3 id="dash-player-info">Pemain: -</h3>
+          <small id="dash-class-info" style="color: var(--text-muted);">Kelas: -</small>
+        </div>
+        <div>
+          <span style="font-size: 1.2rem; font-weight: bold; color: var(--primary-blue);">Skor: <span id="dash-score">0</span></span>
+        </div>
+      </div>
+
+      <h4 style="margin-top: 20px; text-align: left;">Pilih Mode Permainan:</h4>
+      <div class="dashboard-grid">
+        <div class="mode-card">
+          <div class="mode-icon">🕵️</div>
+          <h4>Detektif Bacaan</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 8px 0;">Temukan gagasan utama, informasi tersurat, dan tersirat dari bacaan.</p>
+          <button class="btn" onclick="startModeDetektif()">Mainkan</button>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon">📖</div>
+          <h4>Jelajah Dunia Teks</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 8px 0;">Eksplorasi ciri struktur teks Deskripsi, Prosedur, LHO, Berita, dll.</p>
+          <button class="btn" onclick="startModeJelajahTeks()">Mainkan</button>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon">🔬</div>
+          <h4>Laboratorium Ejaan</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 8px 0;">Perbaiki kesalahan huruf kapital, tanda baca, dan kata depan/imbuhan.</p>
+          <button class="btn" onclick="startModeEjaan()">Mainkan</button>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon">🧩</div>
+          <h4>Susun Kalimat & Paragraf</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 8px 0;">Urutkan acakan kata atau kalimat menjadi paragraf yang runtut.</p>
+          <button class="btn" onclick="startModeSusun()">Mainkan</button>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon">🔍</div>
+          <h4>Cek Fakta Digital</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 8px 0;">Simulasi literasi digital untuk membedakan fakta vs opini dan hoaks.</p>
+          <button class="btn" onclick="startModeCekFakta()">Mainkan</button>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon">✍️</div>
+          <h4>Tantangan Menulis</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 8px 0;">Buat teks sederhana dengan bantuan panduan struktur dan daftar periksa.</p>
+          <button class="btn" onclick="startModeMenulis()">Mainkan</button>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon">⚡</div>
+          <h4>Kuis Kilat Bahasa</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 8px 0;">Uji kecepatan dan kejelasannya dengan batas waktu tayang.</p>
+          <button class="btn" onclick="startModeKuisKilat()">Mainkan</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 25px;" class="no-print">
+        <button class="btn btn-green" onclick="showPage('page-result')">Lihat Hasil Belajar</button>
+        <button class="btn btn-orange" onclick="showPage('page-landing')">Keluar / Ganti Pemain</button>
+      </div>
+    </div>
+
+    <!-- AREA PERMAINAN INTERAKTIF -->
+    <div id="page-gameplay" class="card hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <span id="game-mode-title" style="font-weight: bold; color: var(--primary-blue);">Mode Permainan</span>
+        <span>Skor: <strong id="game-score">0</strong></span>
+      </div>
+
+      <div id="timer-container" class="timer-bar hidden">
+        <div id="timer-progress" class="timer-progress"></div>
+      </div>
+
+      <div id="game-content">
+        <!-- Dynamic Content Injected Here -->
+      </div>
+
+      <div id="game-feedback" class="feedback-box hidden"></div>
+
+      <div style="margin-top: 20px; text-align: right;">
+        <button id="btn-next" class="btn btn-green hidden" onclick="nextQuestion()">Lanjut &raquo;</button>
+        <button class="btn btn-orange no-print" onclick="showPage('page-dashboard')">Batal / Kembali</button>
+      </div>
+    </div>
+
+    <!-- HASIL BELAJAR / EVALUASI SISWA -->
+    <div id="page-result" class="card text-center hidden">
+      <h2>HASIL EVALUASI BELAJAR LITERASI</h2>
+      <p id="res-player-name" style="font-size: 1.1rem; margin-top: 5px; font-weight: bold;">-</p>
+      
+      <div style="margin: 20px 0;">
+        <h1 id="res-final-score" style="font-size: 3.5rem; color: var(--primary-blue);">0</h1>
+        <p>Total Skor Perolehan</p>
+      </div>
+
+      <div class="badge-container">
+        <div class="badge" id="res-title">Gelar: Pemula Literasi</div>
+      </div>
+
+      <table style="max-width: 600px; margin: 20px auto;">
+        <tr>
+          <th>Statistik</th>
+          <th>Nilai</th>
+        </tr>
+        <tr>
+          <td>Total Soal/Tantangan Dijawab</td>
+          <td id="res-total-answered">0</td>
+        </tr>
+        <tr>
+          <td>Tepat / Selesai</td>
+          <td id="res-correct-count" style="color: var(--correct-green); font-weight: bold;">0</td>
+        </tr>
+        <tr>
+          <td>Akurasi Kebahasaan</td>
+          <td id="res-accuracy">0%</td>
+        </tr>
+      </table>
+
+      <div id="res-recommendation" class="feedback-box correct" style="text-align: left; max-width: 600px; margin: 0 auto 20px;">
+        <strong>Catatan Evaluasi Guru:</strong>
+        <p id="res-rec-text">Terus kembangkan minat membaca dan kejelian analisis bahasamu dalam kehidupan sehari-hari!</p>
+      </div>
+
+      <div class="no-print">
+        <button class="btn btn-green" onclick="window.print()">Cetak Hasil Evaluasi</button>
+        <button class="btn" onclick="showPage('page-dashboard')">Kembali ke Dashboard</button>
+      </div>
+    </div>
+
+    <!-- HALAMAN GURU / CONTROL PANEL -->
+    <div id="page-teacher" class="card hidden">
+      <h3>Panel Kendali Guru & Evaluasi Klasikal</h3>
+      <p style="color: var(--text-muted); margin-bottom: 20px;">Atur parameter modul pembelajaran Bahasa Indonesia untuk diproyeksikan pada IFP/PID.</p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; text-align: left;">
+        <div class="form-group">
+          <label>Ubah Nama Sekolah:</label>
+          <input type="text" id="cfg-school" class="form-control" value="SMP NEGERI LITERASI">
+        </div>
+        <div class="form-group">
+          <label>Waktu Kuis Kilat (Detik):</label>
+          <input type="number" id="cfg-timer" class="form-control" value="30" min="10" max="120">
+        </div>
+      </div>
+
+      <button class="btn btn-green" onclick="saveTeacherSettings()">Simpan Pengaturan</button>
+
+      <hr style="margin: 20px 0;">
+
+      <h4>Rekap Hasil Lokal Siswa</h4>
+      <div id="teacher-stats-table">
+        <p style="color: var(--text-muted); margin-top: 10px;">Belum ada riwayat siswa tersimpan di browser ini.</p>
+      </div>
+
+      <div style="margin-top: 20px;" class="no-print">
+        <button class="btn btn-orange" onclick="clearLocalData()">Hapus Data Riwayat</button>
+        <button class="btn" onclick="showPage('page-landing')">Kembali ke Beranda</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- BANK SOAL & DATA GAME BAHASA INDONESIA ---
+    const questionBank = {
+      detektif: [
+        {
+          text: "Setiap Jumat, siswa kelas VIII melaksanakan kegiatan membersihkan lingkungan sekolah. Mereka membagi tugas untuk membersihkan kelas, merawat tanaman, dan memilah sampah. Kegiatan tersebut membuat lingkungan lebih nyaman sekaligus menumbuhkan tanggung jawab bersama.",
+          q: "Apa gagasan utama dari teks di atas?",
+          options: [
+            { text: "Siswa kelas VIII memilah sampah setiap hari Jumat.", correct: false },
+            { text: "Kegiatan membersihkan lingkungan sekolah oleh siswa kelas VIII setiap Jumat.", correct: true },
+            { text: "Manfaat merawat tanaman di sekolah.", correct: false },
+            { text: "Pembagian tugas kelas VIII yang kurang adil.", correct: false }
+          ],
+          exp: "Gagasan utama terletak pada awal paragraf (deduktif) yang menjelaskan kegiatan pembersihan lingkungan sekolah oleh siswa kelas VIII setiap hari Jumat."
+        },
+        {
+          text: "Hutan bakau memiliki peran krusial dalam melindungi pesisir dari erosi gelombang laut. Selain itu, akar bakau yang rapat menjadi tempat memijah bagi berbagai jenis ikan dan udang. Sayangnya, alih fungsi lahan pesisir terus mengancam keberadaan hutan bakau ini.",
+          q: "Informasi tersirat dari teks di atas adalah...",
+          options: [
+            { text: "Hutan bakau hanya ada di pesisir pulau Jawa.", correct: false },
+            { text: "Jika alih fungsi lahan dibiarkan, populasi ikan dan udang di pesisir dapat menurun.", correct: true },
+            { text: "Semua orang setuju untuk merusak hutan bakau.", correct: false },
+            { text: "Erosi laut tidak dipengaruhi oleh keberadaan tanaman bakau.", correct: false }
+          ],
+          exp: "Informasi tersirat (kesimpulan logis): Kerusakan hutan bakau akibat alih fungsi lahan akan merusak tempat memijah ikan/udang sehingga populasinya terancam."
+        }
+      ],
+      jelajah: [
+        {
+          type: "Teks Prosedur",
+          text: "Berikut adalah langkah-langkah membuat teh manis hangat:\n1. Rebus air hingga mendidih.\n2. Masukkan kantong teh celup ke dalam cangkir.\n3. Tuangkan air panas dan tambahkan 2 sendok makan gula.\n4. Aduk hingga gula larut sempurna.",
+          q: "Ciri bahasa utama yang paling menonjol pada teks prosedur di atas adalah...",
+          options: [
+            { text: "Menggunakan kalimat perintah (imperatif) seperti 'Rebus', 'Masukkan', 'Tuangkan'.", correct: true },
+            { text: "Menggunakan kata-kata kiasan dan majas personifikasi.", correct: false },
+            { text: "Menggunakan kata ganti orang pertama 'Aku'.", correct: false },
+            { text: "Menyampaikan opini subjektif tanpa urutan langkah.", correct: false }
+          ],
+          exp: "Teks prosedur dicirikan oleh penggunaan kata kerja imperatif (perintah) untuk memandu langkah-langkah kegiatan secara runtut."
+        }
+      ],
+      ejaan: [
+        {
+          wrong: "adik pergi kesekolah pada hari senin.",
+          q: "Pilihlah perbaikan ejaan dan tanda baca yang paling tepat!",
+          options: [
+            { text: "Adik pergi kesekolah pada hari senin.", correct: false },
+            { text: "Adik pergi ke sekolah pada hari Senin.", correct: true },
+            { text: "adik pergi Ke Sekolah pada Hari Senin.", correct: false },
+            { text: "Adik pergi ke-sekolah pada hari senin.", correct: false }
+          ],
+          exp: "Awal kalimat dan nama hari ('Senin') menggunakan huruf kapital. Kata 'ke' pada 'ke sekolah' berfungsi sebagai kata depan (penunjuk tempat), sehingga ditulis terpisah."
+        },
+        {
+          wrong: "pada bulan agustus para siswa mengadakan lomba di kota bandung.",
+          q: "Perbaikan ejaan yang benar sesuai EYD adalah...",
+          options: [
+            { text: "Pada bulan Agustus para siswa mengadakan lomba di Kota Bandung.", correct: true },
+            { text: "Pada Bulan Agustus para siswa mengadakan lomba di kota Bandung.", correct: false },
+            { text: "Pada bulan agustus para siswa mengadakan Lomba di kota Bandung.", correct: false },
+            { text: "pada bulan Agustus para siswa mengadakan lomba di kota bandung.", correct: false }
+          ],
+          exp: "Nama bulan ('Agustus') dan nama diri geografis ('Kota Bandung') diawali huruf kapital. Kata 'bulan' dan 'lomba' menggunakan huruf kecil."
+        }
+      ],
+      susun: [
+        {
+          title: "Susun Urutan Kalimat menjadi Paragraf Runtut",
+          items: [
+            "Setibanya di sana, kami langsung mendirikan tenda di dekat aliran sungai.",
+            "Pada liburan semester lalu, anggota Pramuka SMP melaksanakan kegiatan kemping.",
+            "Malam harinya, kami berkumpul di sekeliling api unggun sambil menyanyikan lagu kebangsaan.",
+            "Semua peserta merasa lelah tetapi senang dengan pengalaman kebersamaan tersebut."
+          ],
+          correctOrder: [1, 0, 2, 3], // 0-indexed correct sequence
+          exp: "Urutan kronologis yang tepat: Pembuka Liburan (2) -> Tiba & Tenda (1) -> Kegiatan Malam (3) -> Penutup Penilaian (4)."
+        }
+      ],
+      cekFakta: [
+        {
+          caseText: "Pesan berantai WhatsApp di grup kelas: 'DARURAT! Besok seluruh sekolah di provinsi diliburkan total karena ada gelombang panas berbahaya. Bagikan ke semua teman!' Pesan ini tidak mencantumkan nama dinas resmi atau pranala berita.",
+          q: "Tindakan paling kritis dan bertanggung jawab sebagai siswa adalah...",
+          options: [
+            { text: "Langsung meneruskan (forward) pesan tersebut ke semua kontak HP.", correct: false },
+            { text: "Mengonfirmasi kebenaran informasi tersebut kepada wali kelas atau situs resmi Pengumuman Sekolah.", correct: true },
+            { text: "Langsung memutuskan untuk tidak datang ke sekolah besok.", correct: false },
+            { text: "Menambahkan bumbu cerita seram lalu membagikannya ke media sosial.", correct: false }
+          ],
+          exp: "Literasi digital mengajarkan kita untuk memeriksa sumber resmi dan mengklarifikasi (saring sebelum bagikan) sebelum mempercayai kabar yang belum jelas kebenarannya."
+        }
+      ],
+      menulis: [
+        {
+          prompt: "Tuliskan satu paragraf Deskripsi Singkat (3-5 kalimat) tentang suasana perpustakaan sekolahmu!",
+          structureNotice: "Struktur: Identifikasi Umum (gambaran tempat) -> Deskripsi Bagian (suasana, benda, kondisi) -> Kesan/Penutup.",
+          checklist: [
+            "Menggunakan kata sifat (tenang, rapi, sejuk).",
+            "Ejaan dan huruf kapital pada awal kalimat sudah tepat.",
+            "Ada kalimat yang menggambarkan pancaindra (penghlihatan/pendengaran)."
+          ]
+        }
+      ],
+      kuisKilat: [
+        {
+          q: "Manakah yang merupakan kata baku dalam Bahasa Indonesia?",
+          options: [
+            { text: "Apotek", correct: true },
+            { text: "Apotik", correct: false },
+            { text: "Kreatip", correct: false },
+            { text: "Ijin", correct: false }
+          ],
+          exp: "Kata baku yang terdaftar di KBBI adalah 'Apotek' (bukan apotik) dan 'Izin' (bukan ijin)."
+        },
+        {
+          q: "Kalimat yang mengandung opini adalah...",
+          options: [
+            { text: "Indonesia merdeka pada tanggal 17 Agustus 1945.", correct: false },
+            { text: "Pemandangan matahari terbit di Puncak Gunung Bromo sangat indah.", correct: true },
+            { text: "Bendera negara Indonesia terdiri atas warna merah dan putih.", correct: false },
+            { text: "Ibu kota Provinsi Jawa Barat adalah Bandung.", correct: false }
+          ],
+          exp: "Pernyataan 'sangat indah' bersifat subjektif dan tergantung penilaian pribadi, sehingga dikategorikan sebagai Opini."
+        }
+      ]
+    };
+
+    // --- STATE APLIKASI ---
+    let gameState = {
+      playerName: "Siswa Literasi",
+      playerClass: "VII",
+      playerMode: "Individu",
+      score: 0,
+      totalAnswered: 0,
+      correctCount: 0,
+      currentMode: "",
+      currentQuestions: [],
+      currentIndex: 0,
+      timerInterval: null,
+      timerSec: 30
+    };
+
+    // --- NAVIGASI HALAMAN ---
+    function showPage(pageId) {
+      document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+      document.getElementById(pageId).classList.remove('hidden');
+    }
+
+    function startGame() {
+      const name = document.getElementById('player-name').value.trim();
+      const pClass = document.getElementById('player-class').value;
+      const pMode = document.getElementById('player-mode').value;
+
+      if(name) gameState.playerName = name;
+      gameState.playerClass = pClass;
+      gameState.playerMode = pMode;
+      gameState.score = 0;
+      gameState.totalAnswered = 0;
+      gameState.correctCount = 0;
+
+      document.getElementById('dash-player-info').innerText = `Pemain: ${gameState.playerName} (${gameState.playerMode})`;
+      document.getElementById('dash-class-info').innerText = `Tingkat: Kelas ${gameState.playerClass}`;
+      document.getElementById('dash-score').innerText = gameState.score;
+
+      showPage('page-dashboard');
+    }
+
+    // --- MODUS GAME LAUNCHERS ---
+    function setupGameMode(modeName, questions) {
+      gameState.currentMode = modeName;
+      gameState.currentQuestions = questions;
+      gameState.currentIndex = 0;
+      
+      document.getElementById('game-mode-title').innerText = `Mode: ${modeName}`;
+      document.getElementById('game-score').innerText = gameState.score;
+      
+      showPage('page-gameplay');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      clearInterval(gameState.timerInterval);
+      document.getElementById('timer-container').classList.add('hidden');
+      document.getElementById('game-feedback').classList.add('hidden');
+      document.getElementById('btn-next').classList.add('hidden');
+
+      const q = gameState.currentQuestions[gameState.currentIndex];
+      const container = document.getElementById('game-content');
+      container.innerHTML = "";
+
+      if(gameState.currentMode === "Detektif Bacaan") {
+        container.innerHTML = `
+          <div style="background: #e1f5fe; padding: 15px; border-left: 4px solid var(--primary-blue); border-radius: 4px; margin-bottom: 15px; font-style: italic; line-height: 1.6;">
+            "${q.text}"
+          </div>
+          <h4>${q.q}</h4>
+          <div id="options-box" style="margin-top: 15px;"></div>
+        `;
+        renderOptions(q.options, q.exp);
+      } 
+      else if(gameState.currentMode === "Jelajah Dunia Teks") {
+        container.innerHTML = `
+          <span style="background: var(--light-green); color: var(--accent-green); padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold;">${q.type}</span>
+          <div style="background: #fff; border: 1px solid #ccc; padding: 15px; border-radius: 6px; margin: 15px 0; white-space: pre-line;">${q.text}</div>
+          <h4>${q.q}</h4>
+          <div id="options-box" style="margin-top: 15px;"></div>
+        `;
+        renderOptions(q.options, q.exp);
+      }
+      else if(gameState.currentMode === "Laboratorium Ejaan") {
+        container.innerHTML = `
+          <h4 style="color: var(--wrong-red);">Kalimat Asal (Salah/Kurang Tepat):</h4>
+          <p style="font-size: 1.2rem; background: #ffebee; padding: 12px; border-radius: 6px; margin: 10px 0; font-weight: bold;">"${q.wrong}"</p>
+          <h4 style="margin-top: 15px;">${q.q}</h4>
+          <div id="options-box" style="margin-top: 15px;"></div>
+        `;
+        renderOptions(q.options, q.exp);
+      }
+      else if(gameState.currentMode === "Susun Kalimat & Paragraf") {
+        renderSortableGame(q);
+      }
+      else if(gameState.currentMode === "Cek Fakta Digital") {
+        container.innerHTML = `
+          <h3 style="color: var(--accent-orange);">📱 Simulasi Literasi Digital</h3>
+          <p style="background: #fff8e1; border: 1px solid var(--accent-orange); padding: 15px; border-radius: 6px; margin: 15px 0;">${q.caseText}</p>
+          <h4>${q.q}</h4>
+          <div id="options-box" style="margin-top: 15px;"></div>
+        `;
+        renderOptions(q.options, q.exp);
+      }
+      else if(gameState.currentMode === "Tantangan Menulis") {
+        renderWritingChallenge(q);
+      }
+      else if(gameState.currentMode === "Kuis Kilat Bahasa") {
+        startTimer();
+        container.innerHTML = `
+          <h3>⚡ Kuis Kilat Kebahasaan</h3>
+          <p style="font-size: 1.2rem; margin: 20px 0; font-weight: bold;">${q.q}</p>
+          <div id="options-box"></div>
+        `;
+        renderOptions(q.options, q.exp);
+      }
+    }
+
+    function renderOptions(options, exp) {
+      const box = document.getElementById('options-box');
+      options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-option';
+        btn.innerText = `${String.fromCharCode(65 + idx)}. ${opt.text}`;
+        btn.onclick = () => checkMultipleChoice(btn, opt.correct, exp);
+        box.appendChild(btn);
+      });
+    }
+
+    function checkMultipleChoice(selectedBtn, isCorrect, explanation) {
+      document.querySelectorAll('.quiz-option').forEach(b => b.onclick = null);
+      
+      const fb = document.getElementById('game-feedback');
+      fb.classList.remove('hidden');
+
+      gameState.totalAnswered++;
+
+      if(isCorrect) {
+        selectedBtn.classList.add('correct');
+        gameState.score += 10;
+        gameState.correctCount++;
+        fb.className = 'feedback-box correct';
+        fb.innerHTML = `<strong>Jawaban Tepat! (+10 Poin)</strong><br>${explanation}`;
+      } else {
+        selectedBtn.classList.add('wrong');
+        fb.className = 'feedback-box wrong';
+        fb.innerHTML = `<strong>Kurang Tepat.</strong><br>${explanation}`;
+      }
+
+      document.getElementById('game-score').innerText = gameState.score;
+      document.getElementById('btn-next').classList.remove('hidden');
+    }
+
+    // --- MODE SUSUN PARAGRAF ---
+    let currentSortState = [];
+    function renderSortableGame(q) {
+      const container = document.getElementById('game-content');
+      currentSortState = q.items.map((item, idx) => ({ text: item, origIdx: idx }));
+      
+      container.innerHTML = `
+        <h3>🧩 ${q.title}</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px;">Gunakan tombol Panah (▲/▼) untuk mengurutkan kalimat dari awal hingga penutup yang runtut.</p>
+        <div id="sort-list"></div>
+        <button class="btn btn-green" style="margin-top: 15px;" onclick="checkSortOrder()">PERIKSA JAWABAN</button>
+      `;
+      updateSortUI();
+    }
+
+    function updateSortUI() {
+      const list = document.getElementById('sort-list');
+      list.innerHTML = "";
+      currentSortState.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'sortable-item';
+        div.innerHTML = `
+          <span><strong>${index + 1}.</strong> ${item.text}</span>
+          <div>
+            <button class="btn" style="padding: 4px 8px; margin: 2px;" onclick="moveSort(${index}, -1)">▲</button>
+            <button class="btn" style="padding: 4px 8px; margin: 2px;" onclick="moveSort(${index}, 1)">▼</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function moveSort(index, direction) {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= currentSortState.length) return;
+      const temp = currentSortState[index];
+      currentSortState[index] = currentSortState[newIndex];
+      currentSortState[newIndex] = temp;
+      updateSortUI();
+    }
+
+    function checkSortOrder() {
+      const q = gameState.currentQuestions[gameState.currentIndex];
+      const userOrder = currentSortState.map(i => i.origIdx);
+      const isCorrect = JSON.stringify(userOrder) === JSON.stringify(q.correctOrder);
+
+      const fb = document.getElementById('game-feedback');
+      fb.classList.remove('hidden');
+      gameState.totalAnswered++;
+
+      if(isCorrect) {
+        gameState.score += 15; // Bonus susun
+        gameState.correctCount++;
+        fb.className = 'feedback-box correct';
+        fb.innerHTML = `<strong>Runtut Sempurna! (+15 Poin)</strong><br>${q.exp}`;
+      } else {
+        fb.className = 'feedback-box wrong';
+        fb.innerHTML = `<strong>Urutan Belum Runtut.</strong><br>${q.exp}`;
+      }
+
+      document.getElementById('game-score').innerText = gameState.score;
+      document.getElementById('btn-next').classList.remove('hidden');
+    }
+
+    // --- MODE TANTANGAN MENULIS ---
+    function renderWritingChallenge(q) {
+      const container = document.getElementById('game-content');
+      let checklistHTML = q.checklist.map(c => `<li><input type="checkbox"> ${c}</li>`).join("");
+
+      container.innerHTML = `
+        <h3>✍️ Ruang Berkarya Menulis Teks</h3>
+        <p style="margin: 10px 0; font-weight: bold;">${q.prompt}</p>
+        <div style="background: #e8f5e9; padding: 10px; border-radius: 6px; font-size: 0.9rem; margin-bottom: 15px;">
+          <strong>Panduan Struktur:</strong> ${q.structureNotice}
+        </div>
+        <textarea id="writing-input" class="form-control" placeholder="Mulai mengetik paragrafmu di sini..." oninput="updateWordCount()"></textarea>
+        <div style="text-align: left; font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
+          Jumlah kata: <span id="word-count">0</span> kata
+        </div>
+        <div style="margin-top: 15px; text-align: left;">
+          <strong>Daftar Periksa Mandiri (Self-Checklist):</strong>
+          <ul style="list-style: none; margin-top: 5px; line-height: 1.8;">
+            ${checklistHTML}
+          </ul>
+        </div>
+        <button class="btn btn-green" style="margin-top: 15px;" onclick="submitWriting()">SIMPAN & SELESAI MENULIS</button>
+      `;
+    }
+
+    function updateWordCount() {
+      const text = document.getElementById('writing-input').value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      document.getElementById('word-count').innerText = words;
+    }
+
+    function submitWriting() {
+      const text = document.getElementById('writing-input').value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+
+      const fb = document.getElementById('game-feedback');
+      fb.classList.remove('hidden');
+      gameState.totalAnswered++;
+
+      if(words >= 15) {
+        gameState.score += 15;
+        gameState.correctCount++;
+        fb.className = 'feedback-box correct';
+        fb.innerHTML = `<strong>Karya Tulis Tersimpan! (+15 Poin)</strong><br>Tulisanmu memenuhi kecukupan kata. Tunjukkan hasil karyamu kepada guru untuk mendapatkan masukan kreativitas lebih lanjut!`;
+      } else {
+        fb.className = 'feedback-box wrong';
+        fb.innerHTML = `<strong>Teks Masih Terlalu Pendek.</strong> Tuliskan minimal 15 kata untuk melengkapi deskripsi yang utuh.`;
+      }
+
+      document.getElementById('game-score').innerText = gameState.score;
+      document.getElementById('btn-next').classList.remove('hidden');
+    }
+
+    // --- TIMER KUIS KILAT ---
+    function startTimer() {
+      const timerBox = document.getElementById('timer-container');
+      const timerBar = document.getElementById('timer-progress');
+      timerBox.classList.remove('hidden');
+      timerBar.style.width = '100%';
+
+      let timeLeft = gameState.timerSec;
+      gameState.timerInterval = setInterval(() => {
+        timeLeft--;
+        const pct = (timeLeft / gameState.timerSec) * 100;
+        timerBar.style.width = `${pct}%`;
+
+        if(timeLeft <= 0) {
+          clearInterval(gameState.timerInterval);
+          checkMultipleChoice({ classList: { add: () => {} } }, false, "Waktu menjawab telah habis!");
+        }
+      }, 1000);
+    }
+
+    function nextQuestion() {
+      gameState.currentIndex++;
+      if(gameState.currentIndex < gameState.currentQuestions.length) {
+        renderQuestion();
+      } else {
+        finishMode();
+      }
+    }
+
+    function finishMode() {
+      saveLocalResult();
+      updateResultPage();
+      showPage('page-result');
+    }
+
+    // --- TRIGGERS ---
+    function startModeDetektif() { setupGameMode("Detektif Bacaan", questionBank.detektif); }
+    function startModeJelajahTeks() { setupGameMode("Jelajah Dunia Teks", questionBank.jelajah); }
+    function startModeEjaan() { setupGameMode("Laboratorium Ejaan", questionBank.ejaan); }
+    function startModeSusun() { setupGameMode("Susun Kalimat & Paragraf", questionBank.susun); }
+    function startModeCekFakta() { setupGameMode("Cek Fakta Digital", questionBank.cekFakta); }
+    function startModeMenulis() { setupGameMode("Tantangan Menulis", questionBank.menulis); }
+    function startModeKuisKilat() { setupGameMode("Kuis Kilat Bahasa", questionBank.kuisKilat); }
+
+    // --- EVALUASI & PERSISTENSI ---
+    function updateResultPage() {
+      document.getElementById('res-player-name').innerText = `${gameState.playerName} (Kelas ${gameState.playerClass})`;
+      document.getElementById('res-final-score').innerText = gameState.score;
+      document.getElementById('res-total-answered').innerText = gameState.totalAnswered;
+      document.getElementById('res-correct-count').innerText = gameState.correctCount;
+
+      const acc = gameState.totalAnswered > 0 ? Math.round((gameState.correctCount / gameState.totalAnswered) * 100) : 0;
+      document.getElementById('res-accuracy').innerText = `${acc}%`;
+
+      let title = "Pemula Literasi";
+      if(gameState.score >= 50) title = "Maestro Literasi / Duta Literasi Muda";
+      else if(gameState.score >= 30) title = "Penjelajah Teks";
+      else if(gameState.score >= 10) title = "Detektif Bacaan";
+      
+      document.getElementById('res-title').innerText = `Gelar: ${title}`;
+    }
+
+    function saveLocalResult() {
+      const logs = JSON.parse(localStorage.getItem('literasi_game_logs') || '[]');
+      logs.push({
+        name: gameState.playerName,
+        class: gameState.playerClass,
+        score: gameState.score,
+        date: new Date().toLocaleDateString('id-ID')
+      });
+      localStorage.setItem('literasi_game_logs', JSON.stringify(logs));
+    }
+
+    function saveTeacherSettings() {
+      const schoolName = document.getElementById('cfg-school').value;
+      const timerSec = parseInt(document.getElementById('cfg-timer').value);
+
+      document.getElementById('school-tag').innerText = schoolName;
+      gameState.timerSec = timerSec;
+
+      alert("Pengaturan Guru berhasil disimpan!");
+      renderTeacherTable();
+    }
+
+    function renderTeacherTable() {
+      const logs = JSON.parse(localStorage.getItem('literasi_game_logs') || '[]');
+      const box = document.getElementById('teacher-stats-table');
+
+      if(logs.length === 0) {
+        box.innerHTML = `<p style="color: var(--text-muted); margin-top: 10px;">Belum ada riwayat siswa tersimpan di browser ini.</p>`;
+        return;
+      }
+
+      let html = `<table><tr><th>Tanggal</th><th>Nama Siswa</th><th>Kelas</th><th>Skor</th></tr>`;
+      logs.forEach(l => {
+        html += `<tr><td>${l.date}</td><td>${l.name}</td><td>${l.class}</td><td><strong>${l.score}</strong></td></tr>`;
+      });
+      html += `</table>`;
+      box.innerHTML = html;
+    }
+
+    function clearLocalData() {
+      if(confirm("Hapus seluruh riwayat skor siswa di peramban ini?")) {
+        localStorage.removeItem('literasi_game_logs');
+        renderTeacherTable();
+      }
+    }
+
+    renderTeacherTable();
+  </script>
+</body>
+</html>
